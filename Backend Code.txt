@@ -1,0 +1,45 @@
+2.2 MYSQL
+from tkinter import *
+import sqlite3
+con = sqlite3.connect('users_data.db')
+cur = con.cursor()
+cur.execute("""CREATE TABLE IF NOT EXISTS record(First_Name text,
+Mobile_Number number, Email text, Age number, Address text)""")
+con.commit()
+def op1():
+ con = sqlite3.connect('users_data.db')
+ cur = con.cursor()
+ cur.execute("INSERT INTO record VALUES(:First_Name, :Mobile_Number,
+:Email, :Age, :Address)",{
+ 'First_Name': lb1.get(),
+ 'Mobile_Number': lb2.get(),
+ 'Email': lb3.get(),
+ 'Age': lb4.get(),
+ 'Address': lb5.get()
+ }
+ )
+ con.commit()
+ import cabbooking
+new = Tk()
+new.geometry('350x550')
+lab = Label(new, text="PERSONAL INFORMATION").place(x=100, y=10)
+lab1 = Label(new, text="Name").place(x=40, y=60)
+lb1 = Entry(new)
+lb1.place(x=150, y=60)
+lab2 = Label(new, text="Phone.no").place(x=40, y=80)
+lb2 = Entry(new)
+lb2.place(x=150, y=80)
+lab3 = Label(new, text="Email ID").place(x=40, y=100)
+lb3 = Entry(new)
+lb3.place(x=150, y=100)
+lab4 = Label(new, text="Age").place(x=40, y=120)
+lb4 = Entry(new)
+lb4.place(x=150, y=120)
+lab5 = Label(new, text="Address").place(x=40, y=140)
+lb5 = Entry(new)
+lb5.place(x=150, y=140)
+b3 = Button(new, text="login", command=op1)
+b3.place(x=150, y=180)
+b4 = Button(new, text="Cancel")
+b4.place(x=70, y=180)
+new.mainloop()

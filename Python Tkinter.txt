@@ -1,0 +1,213 @@
+from tkinter import *
+from tkinter import messagebox
+import folium
+import webbrowser
+import sqlite3
+import random
+z = Tk()
+z.title("Cab booking")
+z.geometry('350x550')
+# Define Entry widgets globally
+ln_base_charge = None
+ln_distance = None
+ln_insurance = None
+ln_extra_charge = None
+taxi_tax_var = None
+distance_var = None
+insurance_var = None
+extra_luggage_var = None
+v = Label(z, text="LOGIN", font=("Arial Bold", 20)).place(x=100, y=10)
+v1 = Label(z, text="Username:").place(x=10, y=50)
+v1 = Entry(z).place(x=100, y=50)
+v2 = Label(z, text="Password:").place(x=10, y=70)
+v2 = Entry(z).place(x=100, y=70)
+def sp():
+new = Tk()
+new.geometry('350x550')
+lab = Label(new, text="PERSONAL INFORMATION").place(x=100, y=10)
+lab1 = Label(new, text="Name").place(x=40, y=60)
+lb1 = Entry(new)
+lb1.place(x=150, y=60)
+lab2 = Label(new, text="Phone.no").place(x=40, y=80)
+lb2 = Entry(new)
+lb2.place(x=150, y=80)
+lab3 = Label(new, text="Email ID").place(x=40, y=100)
+lb3 = Entry(new)
+lb3.place(x=150, y=100)
+lab4 = Label(new, text="Age").place(x=40, y=120)
+lb4 = Entry(new)
+lb4.place(x=150, y=120)
+lab5 = Label(new, text="Address").place(x=40, y=140)
+lb5 = Entry(new)
+lb5.place(x=150, y=140)
+def on_ok():
+# Add your logic to store user information or perform any other actions
+new.destroy()
+def on_cancel():
+new.destroy()
+ok_button = Button(new, text="OK", command=on_ok)
+ok_button.place(x=100, y=200)
+cancel_button = Button(new, text="Cancel", command=on_cancel)
+cancel_button.place(x=200, y=200)
+def va():
+w = Toplevel()
+w.geometry('350x550')
+la = Label(w, text="WELCOME TO UBER", font=15).place(x=100, y=10)
+la1 = Label(w, text="BOOKING DETAILS").place(x=120, y=30)
+# Pickup and Drop Locations ComboBoxes
+l_pickup = Label(w, text="Pickup Location").place(x=40, y=60)
+pickup_locations = ["Salem", "Coimbatore", "Chennai", "Erode",
+"Tiruppur"]
+pickup_var = StringVar(w)
+pickup_var.set("Select Pickup Location")
+pickup_menu = OptionMenu(w, pickup_var,
+*pickup_locations).place(x=200, y=60)
+l_drop = Label(w, text="Drop Location").place(x=40, y=80)
+drop_locations = ["Salem", "Coimbatore", "Chennai", "Erode", "Tiruppur"]
+drop_var = StringVar(w)
+drop_var.set("Select Drop Location")
+drop_menu = OptionMenu(w, drop_var, *drop_locations).place(x=200,
+y=80)
+# Store Entry widgets globally
+global ln_base_charge, ln_distance, ln_insurance, ln_extra_charge
+global taxi_tax_var, distance_var, insurance_var, extra_luggage_var
+ln_base_charge = Entry(w, state='disabled', width=6)
+ln_base_charge.place(x=200, y=100)
+ln_base_charge.insert(0, "50") # Example fixed base charge
+ln_distance = Entry(w, state='disabled', width=6)
+ln_distance.place(x=200, y=120)
+ln_distance.insert(0, "10") # Example fixed distance charge
+ln_insurance = Entry(w, state='disabled', width=6)
+ln_insurance.place(x=200, y=140)
+ln_insurance.insert(0, "20") # Example fixed insurance charge
+ln_extra_charge = Entry(w, state='disabled', width=6)
+ln_extra_charge.place(x=200, y=160)
+ln_extra_charge.insert(0, "10") # Example fixed extra charge
+# Add fixed charges
+fixed_charges = [29, 5, 50, 25]
+total_fixed_charge = sum(fixed_charges)
+ln_base_charge.delete(0, END)
+ln_base_charge.insert(0, str(total_fixed_charge))
+# Car Type
+l_car_type = Label(w, text="Car Type").place(x=40, y=180)
+car_types = ["Sedan", "Hatchback", "SUV", "Luxury"]
+car_type_var = StringVar(w)
+car_type_var.set("Select Car Type")
+car_type_menu = OptionMenu(w, car_type_var, *car_types).place(x=200,y=180)
+# AC and Non-AC Buttons
+l_ac = Label(w, text="AC/Non-AC").place(x=40, y=200)
+ac_var = IntVar()
+ac_button = Checkbutton(w, text="AC", variable=ac_var).place(x=200,y=200)
+non_ac_var = IntVar()
+non_ac_button = Checkbutton(w, text="Non-AC",
+variable=non_ac_var).place(x=270, y=200)
+# ComboBox for Taxi Tax (Basecharge)
+l_taxi_tax = Checkbutton(w, text="Taxi Tax(Basecharge)(Rs)", onvalue=1,
+offvalue=0).place(x=40, y=225)
+taxi_tax_values = [30, 40, 50, 60] # Add your desired values
+taxi_tax_var = StringVar(w)
+taxi_tax_var.set(taxi_tax_values[0]) # Default value
+taxi_tax_menu = OptionMenu(w, taxi_tax_var,
+*taxi_tax_values).place(x=200, y=225)
+# ComboBox for Distance (KMs)
+l_distance = Checkbutton(w, text="Distance(KMs)", onvalue=1,
+offvalue=0).place(x=40, y=245)
+distance_values = [40, 50, 60, 70] # Add your desired values
+distance_var = StringVar(w)
+distance_var.set(distance_values[1]) # Default value
+distance_menu = OptionMenu(w, distance_var,
+*distance_values).place(x=200, y=245)
+# ComboBox for Travelling Insurance (Rs)
+l_insurance = Checkbutton(w, text="TravellingInsurance(Rs)", onvalue=1,
+offvalue=0).place(x=40, y=265)
+insurance_values = [30, 40, 50, 60] # Add your desired values
+insurance_var = StringVar(w)
+insurance_var.set(insurance_values[0]) # Default value
+insurance_menu = OptionMenu(w, insurance_var,
+*insurance_values).place(x=200, y=265)
+# ComboBox for Extra Luggage (Rs)
+l_extra_luggage = Checkbutton(w, text="Extra Luggage(Rs)", onvalue=1,
+offvalue=0).place(x=40, y=285)
+extra_luggage_values = [50, 60, 70, 80] # Add your desired values
+extra_luggage_var = StringVar(w)
+extra_luggage_var.set(extra_luggage_values[0]) # Default value
+extra_luggage_menu = OptionMenu(w, extra_luggage_var,
+*extra_luggage_values).place(x=200, y=285)
+ln9 = Entry(w, width=5).place(x=90, y=380)
+r1 = Radiobutton(w, text="Oneway", value=1).place(x=120, y=320)
+r2 = Radiobutton(w, text="Roundtrip", value=2).place(x=120, y=340)
+b2 = Button(w, text="Next page", command=lambda: op(w, ln_base_charge,
+ln_distance, ln_insurance, ln_extra_charge))
+b2.place(x=280, y=440)
+def op(w, ln_base_charge, ln_distance, ln_insurance, ln_extra_charge):
+n = Toplevel()
+n.geometry('350x550')
+lab = Label(n, text="Payment Method").place(x=40, y=60)
+r3 = Radiobutton(n, text="Net Baking", value=3).place(x=150, y=60)
+r4 = Radiobutton(n, text="UPI Transaction", value=4).place(x=150, y=80)
+r5 = Radiobutton(n, text="Onspot pay", value=5).place(x=150, y=100)
+b5 = Button(n, text="CONFIRM BOOKING",
+command=lambda: bk(w, ln_base_charge, ln_distance, ln_insurance,
+ln_extra_charge))
+b5.place(x=200, y=150)
+def bk(w, ln_base_charge, ln_distance, ln_insurance, ln_extra_charge):
+receipt_number = generate_receipt_number()
+receipt_window = Toplevel()
+receipt_window.geometry('400x300')
+receipt_window.title("Receipt")
+receipt_label = Label(receipt_window, text="Receipt", font=("Arial Bold",
+20)).place(x=150, y=10)
+receipt_label = Label(receipt_window, text=f"Receipt Number:
+{receipt_number}").place(x=20, y=50)
+# Check if the entries are not empty before converting to float
+base_charge = float(ln_base_charge.get()) if ln_base_charge.get() else 0.0
+distance_charge = float(ln_distance.get()) if ln_distance.get() else 0.0
+insurance_charge = float(ln_insurance.get()) if ln_insurance.get() else 0.0
+extra_charge = float(ln_extra_charge.get()) if ln_extra_charge.get() else 0.0
+receipt_label = Label(receipt_window, text=f"Base Charge: Rs
+{ln_base_charge.get()}").place(x=20, y=80)
+receipt_label = Label(receipt_window, text=f"Distance Charge: Rs
+{ln_distance.get()}").place(x=20, y=110)
+receipt_label = Label(receipt_window, text=f"Insurance Charge: Rs
+{ln_insurance.get()}").place(x=20, y=140)
+receipt_label = Label(receipt_window, text=f"Extra Charge: Rs
+{ln_extra_charge.get()}").place(x=20, y=170)
+total_cost = base_charge + distance_charge + insurance_charge +
+extra_charge
+receipt_label = Label(receipt_window, text=f"Total Cost: Rs
+{total_cost}").place(x=20, y=200)
+messagebox.showinfo("Booking Confirmed", "Your booking has been
+confirmed. Receipt sent to your email.")
+def generate_receipt_number():
+return random.randint(1000, 9999)
+def op2():
+n1 = Toplevel()
+n1.geometry('350x550')
+def display_folium_map():
+mapObj = folium.Map(location=[21.437730075416685, 77.255859375],
+zoom_start=4, tiles=None)
+folium.TileLayer('openstreetmap').add_to(mapObj)
+folium.TileLayer('stamenterrain', attr="stamenterrain").add_to(mapObj)
+folium.TileLayer('stamenwatercolor',
+attr="stamenwatercolor").add_to(mapObj)
+folium.TileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r
+}.png',
+name='CartoDB.DarkMatter', attr="CartoDB.DarkMatter").add_to(mapObj)
+folium.LayerControl().add_to(mapObj)
+source_coords = [11.664325, 78.146011]
+destination_coords = [13.067439, 80.237617]
+folium.Marker(source_coords, popup='Source').add_to(mapObj)
+folium.Marker(destination_coords, popup='Destination').add_to(mapObj)
+folium.PolyLine([source_coords, destination_coords],
+color='blue').add_to(mapObj)
+map_file_path = 'folium_with_markers.html'
+mapObj.save(map_file_path)
+webbrowser.open(map_file_path)
+b = Button(z, text="Login", command=va)
+b.place(x=200, y=150)
+b1 = Button(z, text="Create account", command=sp)
+b1.place(x=50, y=150)
+b_folium = Button(z, text="Show Folium Map",
+command=display_folium_map)
+b_folium.place(x=130, y=400)
+z.mainloop()
